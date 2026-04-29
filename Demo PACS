@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>AI Radiology Demo</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    margin: 0;
+}
+
+.header {
+    background: #020617;
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+button {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+button:hover {
+    background: #6d28d9;
+}
+
+img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.study-btn {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    background: #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+🧠 AI Radiology Assistant (Demo)
+</div>
+
+<div class="container">
+
+<div class="card">
+<h3>1. Cargar Imagen (simulación DICOM)</h3>
+<input type="file" id="file">
+<br>
+<button onclick="upload()">Cargar</button>
+</div>
+
+<div class="card">
+<h3>2. PACS (Estudios)</h3>
+<div id="studies"></div>
+</div>
+
+<div class="card">
+<h3>3. Imagen</h3>
+<img id="image"/>
+</div>
+
+<div class="card">
+<h3>4. IA Diagnóstico</h3>
+<button onclick="runAI()">Activar IA</button>
+<p id="result"></p>
+<img id="heatmap"/>
+</div>
+
+</div>
+
+<script>
+let studies = [];
+let currentImage = null;
+
+function upload(){
+    const file = document.getElementById("file").files[0];
+    if(!file) return;
+
+    const url = URL.createObjectURL(file);
+
+    const study = {
+        name: file.name,
+        image: url,
+        patient: "Paciente_" + Math.floor(Math.random()*100),
+        modality: "RX"
+    };
+
+    studies.push(study);
+    renderStudies();
+}
+
+function renderStudies(){
+    const container = document.getElementById("studies");
+    container.innerHTML = "";
+
+    studies.forEach(s => {
+        const btn = document.createElement("button");
+        btn.className = "study-btn";
+        btn.innerText = s.patient + " - " + s.modality;
+
+        btn.onclick = () => {
+            currentImage = s.image;
+            document.getElementById("image").src = s.image;
+            document.getElementById("heatmap").src = "";
+            document.getElementById("result").innerText = "";
+        };
+
+        container.appendChild(btn);
+    });
+}
+
+function runAI(){
+    if(!currentImage){
+        alert("Selecciona una imagen primero");
+        return;
+    }
+
+    document.getElementById("result").innerText =
+        "🩺 Neumonía detectada (78%)";
+
+    const baseImg = document.getElementById("image");
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const img = new Image();
+    img.src = currentImage;
+
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        ctx.drawImage(img, 0, 0);
+
+        // Zona sospechosa (simulada)
+        ctx.fillStyle = "rgba(255,0,0,0.35)";
+        ctx.fillRect(
+            canvas.width * 0.3,
+            canvas.height * 0.3,
+            canvas.width * 0.25,
+            canvas.height * 0.25
+        );
+
+        document.getElementById("heatmap").src =
+            canvas.toDataURL();
+    };
+}
+</script>
+
+</body>
+</html>
