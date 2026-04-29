@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AI Radiology Demo</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.card {
+    background: #1e293b;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 12px;
+}
+
+button {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+img {
+    max-width: 400px;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🧠 AI Radiology Assistant</h1>
+
+<div class="card">
+<h2>1. Cargar Imagen (simulación DICOM)</h2>
+<input type="file" id="file">
+<br>
+<button onclick="upload()">Cargar</button>
+</div>
+
+<div class="card">
+<h2>2. PACS (Estudios almacenados)</h2>
+<div id="list"></div>
+</div>
+
+<div class="card">
+<h2>3. Visualización</h2>
+<img id="img"/>
+</div>
+
+<div class="card">
+<h2>4. IA Diagnóstico</h2>
+<button onclick="predict()">Activar IA</button>
+<p id="result"></p>
+<img id="heatmap"/>
+</div>
+
+</div>
+
+<script>
+let studies = [];
+let currentImage = null;
+
+function upload(){
+    const file = document.getElementById("file").files[0];
+    if(!file) return;
+
+    const url = URL.createObjectURL(file);
+
+    const study = {
+        name: file.name,
+        image: url,
+        patient: "Paciente_" + Math.floor(Math.random()*100),
+        modality: "RX"
+    };
+
+    studies.push(study);
+    renderStudies();
+}
+
+function renderStudies(){
+    const div = document.getElementById("list");
+    div.innerHTML = "";
+
+    studies.forEach(s => {
+        const btn.innerText = document.createElement("button");
+        btn.innerText = s.patient + " - " + s.modality;
+        btn.onclick = () => {
+            currentImage = s.image;
+            document.getElementById("img").src = s.image;
+            document.getElementById("heatmap").src = "";
+            document.getElementById("result").innerText = "";
+        };
+        div.appendChild(btn);
+    });
+}
+
+function predict(){
+    if(!currentImage){
+        alert("Selecciona una imagen primero");
+        return;
+    }
+
+    // Simulación IA
+    document.getElementById("result").innerText =
+        "Neumonía detectada (78%)";
+
+    // Generar heatmap fake (overlay rojo)
+    const img = document.getElementById("img");
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const image = new Image();
+    image.src = currentImage;
+
+    image.onload = () => {
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        ctx.drawImage(image, 0, 0);
+
+        ctx.fillStyle = "rgba(255,0,0,0.3)";
+        ctx.fillRect(50, 50, 150, 150); // zona sospechosa
+
+        document.getElementById("heatmap").src = canvas.toDataURL();
+    };
+}
+</script>
+
+</body>
+</html>
